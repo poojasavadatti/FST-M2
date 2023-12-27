@@ -1,0 +1,62 @@
+1.open docker desktop and run the created hdfs container.
+2.run the below command
+docker exec -it bdeb81506085a00e5496a1d65d6e21d3fe711edb6007761d1025ff421d bash
+3.create file in root level
+vim root/zipcodes.csv
+
+1,US,PARC PARQUE,704,PR
+2,US,PASEO COSTA DEL SUR,704,PR
+10,US,BDA SAN LUIS,709,PR
+61391,US,CINGULAR WIRELESS,76166,TX
+61392,US,FORT WORTH,76177,TX
+61393,US,FT WORTH,76177,TX
+4,US,URB EUGENE RICE,704,PR
+39827,US,MESA,85209,AZ
+39828,US,MESA,85210,AZ
+49345,US,HILLIARD,32046,FL
+49346,US,HOLDER,34445,FL
+49347,US,HOLT,32564,FL
+49348,US,HOMOSASSA,34487,FL
+3,US,SECT LANAUSSE,704,PR
+54354,US,SPRING GARDEN,36275,AL
+54355,US,SPRINGVILLE,35146,AL
+54356,US,SPRUCE PINE,35585,AL
+76511,US,ASH HILL,27007,NC
+76512,US,ASHEBORO,27203,NC
+76513,US,ASHEBORO,27204,NC
+
+5.Check if file is added using cat cmd
+cat root/zipcodes.csv
+6.Create table in hive
+vim root/zipcodes-partition.hive
+Press I and add the below lines
+
+--create zipcodes tables
+CREATE TABLE zipcodes
+(RecordNumber int,Country string,City string,ZipCode int)
+PARTITIONED BY (state string)
+CLUSTERED BY (ZipCode) INTO 5 BUCKETS
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ',';
+
+--Load data into table
+LOAD DATA LOCAL INPATH '/root/zipcodes.csv' INTO TABLE zipcodes;
+
+--Export data from table
+INSERT OVERWRITE LOCAL DIRECTORY '/root/hiveOutput'
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
+SELECT * FROM zipcodes WHERE state='PR' and zipcode=704;
+
+
+Press esc and ":wq" to quit
+
+7.give the below cmd to generate the output
+
+hive -f root/zipcodes-partition.hive
+
+8.give below command to see the output file
+
+ls root/hiveOutput/
+9.To see all clusters and partitions in hive,use below command in hive shell.
+ dfs -ls -R /user/hive/warehouse/zipcodes;
+

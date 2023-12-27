@@ -1,0 +1,16 @@
+1.in /#(windows Powershell) type below cmds
+Create vim file named Activity5.hive
+
+create database office;
+use office;
+CREATE TABLE employee
+(id INT, name STRING, dept STRING, yoj INT, salary INT)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
+TBLPROPERTIES ("skip.header.line.count"="1");
+
+LOAD DATA LOCAL INPATH '/EmpData.csv' INTO TABLE employee;
+
+SELECT COUNT(*) FROM employee;
+
+2.execute in /#(windows Powershell)
+hive -f Activity5.hive

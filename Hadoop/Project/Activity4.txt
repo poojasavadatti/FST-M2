@@ -1,0 +1,47 @@
+
+
+
+
+1.open docker and click the run button of the container
+2.Go to windows powershell and exec the cmd
+docker exec -it bdeb81506085a00e5496a1d65d6e21d3fe711edb6007761d1025ff421d bash
+3.stay in </# and not ~# in cmd prompt> and type "hive"
+4.hive will begin
+5.ctrl+l->kind of clear since clear cmd will not work in hive.
+6.Check what databases and tables you have by following commands.
+show databases;
+show tables;
+7.CREATE TABLE file(line STRING);
+create new table named file and make a column named "line" of string datatype.
+8.LOAD DATA LOCAL INPATH '/root/file.txt' INTO TABLE file;
+insert records from a file.txt which we have created in local linux container using vim command in activity 1
+9.SELECT * from file;
+10.DESCRIBE file;
+this describes the datatype and column name of the table named file.
+11.CREATE TABLE word_counts AS
+    > SELECT word,COUNT(1) AS count FROM
+    > (SELECT explode(split(line,' ')) AS word FROM file) w
+    > GROUP BY word
+    > ORDER BY count DESC;
+
+The above steps are to create in hive.
+
+#To create in files follow below things#
+========================================
+
+1.Create file01.txt (Hello World Bye World) using vim
+vim file01.txt
+2.vim wordCount.hive and enter belw lines
+DROP TABLE files;
+DROP TABLE word_counts;
+CREATE TABLE files (line STRING);
+LOAD DATA LOCAL INPATH '/file01.txt' INTO TABLE files;
+CREATE TABLE word_counts AS
+SELECT word, count(1) AS count FROM
+(SELECT explode(split(line, ' ')) AS word FROM files) w
+GROUP BY word
+ORDER BY word;
+3.execute using below cmd
+hive -f wordCount.hive
+
+

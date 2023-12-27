@@ -1,0 +1,101 @@
+
+Hadoop day2
+===========
+1.start the container in dockr
+2.go to powershell and type the command
+docker exec -it bdeb81506085a00e5496a1d65d6e21d3fe711edb6007761d1025ff421da267ad bash
+
+bdeb81506085a00e5496a1d65d6e21d3fe711edb6007761d1025ff421da267ad
+-this is the container id copied from docker
+3.Now powershell turns to linux terminal.
+--type cd root/ in the terminal.There will be only root directory in the hdfs by default(to check type "hdfs dfs -ls").so create directory with your name as follows
+
+hdfs dfs -mkdir /user/thivya 
+--and create file 
+vim file.txt
+this will create file in the linux local system.copy this to container(hdfs).
+4.hdfs dfs -put file.txt /user/thivya
+
+format is hdfs dfs -put <src> <hdfs destination>
+5.If you want to edit the file.txt,then use the below command
+vim file.txt
+press "i"
+modify the file as needed
+then press "esc"
+type ":wq" and click enter
+6.Now to update the same in hdfs we cannot use the same put(hdfs dfs -put file.txt /user/thivya) command bcz it will say file already exists.so use the "-f" flag which will force to update.(-f will replace the existing file)
+hdfs dfs -put -f file.txt /user/thivya
+7.to see the contents in hdfs file
+hdfs dfs -cat /user/thivya/file.txt
+8.To copy the file from hdfs to linux local system
+hdfs dfs -get <src> <dest>
+hdfs dfs -get /user/thivya/file.txt /root
+
+Hadoop day3-Activity 2
+===========
+Prerequisite
+============
+There should be a new directory named thivya in hdfs with the file.txt file which we are going to use in the mapReduce.
+
+MapReduce
+==========
+1.start the container in dockr
+2.go to powershell and type the command
+docker exec -it bdeb81506085a00e5496a1d65d6e21d3fe711edb6007761d1025ff421da267ad bash
+
+bdeb81506085a00e5496a1d65d6e21d3fe711edb6007761d1025ff421da267ad
+-this is the container id copied from docker
+3.Now powershell turns to linux terminal.
+type cd root/ in the terminal and create vim activity2.pig
+and type below commands.
+
+--Load the input file
+inputFile= LOAD 'hdfs:///user/thivya/file.txt' As (line:chararray);
+--Tokenize string into words(MAP)
+words = FOREACH inputFile GENERATE FLATTEN(TOKENIZE(line)) AS word;
+--Group words by word
+grpd = GROUP words by word;
+--count the number of words(REDUCE)
+totalCount = FOREACH grpd GENERATE $0,COUNT($1);
+--store the output in HDFS
+STORE totalCount into 'hdfs:///user/thivya/pigOutput';
+
+4.Press esc.Type :wq
+5.$HADOOP_HOME/sbin/mr-jobhistory-daemon.sh start historyserver 
+run this in terminal
+6.give pig activity2.pig
+7.hdfs dfs -ls -R /user/thivya
+it will list all files inside the directory.
+8.Got to this file
+hdfs dfs -cat /user/thivya/pigOutput/part-r-00000
+it will list all your files with the mapped count
+
+
+
+
+
+
+
+
+explanation
+===========
+-- this is comment line in command terminal
+inputFile = LOAD 'hdfs:///user/thivya/file.txt' AS (line);
+this is like create statement in sql
+
+ex:pig -x activity2.pig,here -x local mode.If -x is not mentioned then by default it will take mapReduce mode.
+
+--Flatten will change the tuple of tuples into single tuple
+
+(1,(2,3))i/p
+
+(1,2,3)o/p as a result of flatten
+
+ $0 - represents key
+ $1 -represents value
+
+
+
+
+
+
